@@ -16,14 +16,18 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
+    - name: Get directory 0
+      run: ls -l && pwd
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.26'
         cache: false
+        check-latest: true
 
-    - name: Get directory
-      run: ls -l
+    - name: Get directory 1
+      run: ls -l && pwd
 
     - name: Build
       run: go build -v -o ./tcp-listener ./cmd/tcp-listener/main.go
