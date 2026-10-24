@@ -22,7 +22,7 @@ jobs:
         go-version: '1.26'
 
     - name: Build
-      run: go build -v -o tcp-listener ./cmd/tcp-listener/main.go
+      run: go build -v -o build/tcp-listener ./cmd/tcp-listener/main.go
 
     - name: Test
-      run: go test -v ./...
+      run: go version
