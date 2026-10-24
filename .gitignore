@@ -1,2 +1,1 @@
-tcp?listener
-!cmd/tcp-listener/*.go
+build/*
