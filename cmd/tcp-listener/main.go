@@ -32,7 +32,7 @@ func main() {
 
 func connHandler(conn net.Conn) error {
 		defer conn.Close()
-		log.Println("New connection! : %s", conn.RemoteAddr().String())
+		log.Printf("New connection! : %s", conn.RemoteAddr().String())
 
 		timeoutDuration := 2 * time.Minute
 		reader := bufio.NewReader(conn)
