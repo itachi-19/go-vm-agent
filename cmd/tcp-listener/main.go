@@ -1,20 +1,22 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
+	"time"
 	"net"
 	"bufio"
+	"io"
 	"log"
 	"strings"
 	// "slices"
-	"sync"
+	// "sync"
 	"os/exec"
 )
 
-var (
-	CONCURRENCY int = 3
-)
-
+// var (
+// 	CONCURRENCY int = 3
+// )
+//
 
 func main() {
 		listener, err := net.Listen("tcp", ":9999")
@@ -22,43 +24,46 @@ func main() {
 			log.Fatalf("error while bootstrapping tcp listener: aklsdjf;a: %v\n", err)
 		}
 		defer listener.Close() 
-		fmt.Println("accepting new connections..")
-
-		var wg sync.WaitGroup
-
-		for i := 0; i < CONCURRENCY; i++ {
-			wg.Add(1)
-			go handler(&wg, &listener)
-		}
-
-		wg.Wait()
-}
-
-
-func handler(wg *sync.WaitGroup, listener *net.Listener) error {
-		defer wg.Done()
+		log.Println("accepting new connections..")
 
 		for {
-				conn, err := (*listener).Accept()
+				conn, err := listener.Accept()
 				if err != nil {
 					log.Fatalf("error accepting a new connection")
 				}
 
-				command, err := getCommand(&conn)
-				runCommand(command)
+				go connHandler(conn)
+		}
+}
+
+
+func connHandler(conn net.Conn) error {
+		defer conn.Close()
+		log.Println("New connection! : %s", conn.RemoteAddr().String())
+
+		timeoutDuration := 2 * time.Minute
+		reader := bufio.NewReader(conn)
+
+		for {
+				_ = conn.SetReadDeadline(time.Now().Add(timeoutDuration))
+				command, err := reader.ReadString('\n')
+				if  err != nil {
+						if err == io.EOF {
+								log.Printf("%s Disconnected gracefully..\n", conn.RemoteAddr().String())
+						} else {
+								log.Print("wasn't able to read for some reason..")
+						}	
+						return err
+				}
+				
+				_ = runCommand(command)
 		}
 
 		return nil
 }
 
-func getCommand(conn *net.Conn) (string, error) {
-		reader := bufio.NewReader(*conn)
-		command, err := reader.ReadString('\n')
-		if  err != nil {
-			log.Print("wasn't able to read for some reason..")
-			return "", err
-		}
-		return command, nil
+func commandHandler() error {
+	return nil 
 }
 
 func runCommand(command string) error {
@@ -67,7 +72,8 @@ func runCommand(command string) error {
 
 		if err != nil {
 			log.Fatalf("error occurred while running the command", err)
-			return err
+			// TODO handle it
+			//return err 
 		}
 
 		log.Println(string(out)) 
