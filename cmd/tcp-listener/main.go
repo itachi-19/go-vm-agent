@@ -5,6 +5,7 @@ import (
 	"net"
 	"bufio"
 	"io"
+	"os"
 	"log"
 	"strings"
 	"os/exec"
@@ -49,32 +50,38 @@ func connHandler(conn net.Conn) error {
 						return err
 				}
 				
-				cmdOutput, err := runCommand(command)
-				_, err = conn.Write(cmdOutput)
-				if err != nil {
-					log.Print("error writing to client socket")
-					return err
-				}
+				go commandHandler(command, conn)
+				// cmdOutput, err := runCommand(command)
+				// _, err = conn.Write(cmdOutput)
+				// if err != nil {
+				// 	log.Print("error writing to client socket")
+				// 	return err
+				// }
 		}
 
 		return nil
 }
 
-func commandHandler() error {
+func commandHandler(command string, conn net.Conn) error {
+	cmd := exec.Command("sh", "-c", strings.TrimSpace(command))
+	cmd.Stdout = conn
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	if err := cmd.Run(); err != nil {
+		log.Print("error occurred while running command ", command)
+		return err
+	}
 	return nil 
 }
 
 func runCommand(command string) ([]byte	, error) {
-		// defer conn.Close()
 		out, err := exec.Command("sh", "-c", strings.TrimSpace(command)).Output()
 
 		if err != nil {
 			log.Print("error occurred while running the command", err)
-			// TODO handle it
-			//return iierr 
 			return []byte{}, err
 		}
 
-		//log.Println(string(out)) 
 		return out, nil
 }
