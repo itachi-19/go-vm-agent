@@ -3,7 +3,7 @@
 
 # Go VM Agent
 
-An agent process that can be run as both root and non-root on a node to act as an agent over TCP protocol.
+An agent process that can be run as both root and non-root on a node to act as an interface over TCP protocol.
 
 Currently enabled features:
 
